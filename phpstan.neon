@@ -1,0 +1,15 @@
+parameters:
+    level: max
+    paths:
+        - .
+    excludePaths:
+        - vendor
+        - linting
+    bootstrapFiles:
+        - phpstan-bootstrap.php
+    treatPhpDocTypesAsCertain: false
+    #exceptions:
+    #    implicitThrows: false
+    #    check:
+    #        missingCheckedExceptionInThrows: true
+    #        tooWideThrowType: true
