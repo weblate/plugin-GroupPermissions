@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -6,6 +7,7 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\GroupPermissions;
 
 use Piwik\Plugin;
@@ -23,32 +25,20 @@ class GroupPermissions extends Plugin
         $model = new Model();
         $model->uninstall();
     }
-    
+
     /**
      * @see Piwik\Plugin::registerEvents
      */
     public function registerEvents()
     {
-        return array(
-            'AssetManager.getJavaScriptFiles'        => 'getJsFiles',
+        return [
             'AssetManager.getStylesheetFiles'        => 'getStylesheetFiles',
             'SitesManager.deleteSite.end'            => 'deleteSite',
             'UsersManager.deleteUser'                => 'deleteUser',
             'Translate.getClientSideTranslationKeys' => 'getClientSideTranslationKeys',
-        );
+        ];
     }
-    
-    /**
-     * Return list of plug-in specific JavaScript files to be imported by the asset manager
-     *
-     * @see Piwik\AssetManager
-     */
-    public function getJsFiles(&$jsFiles)
-    {
-        $jsFiles[] = "plugins/GroupPermissions/javascripts/groupPermissions.js";
-        $jsFiles[] = "plugins/GroupPermissions/javascripts/choices.min.js";
-    }
-    
+
     /**
      * Return list of plug-in specific Stylesheet files to be imported by the asset manager
      *
@@ -56,18 +46,48 @@ class GroupPermissions extends Plugin
      */
     public function getStylesheetFiles(&$stylesheetFiles)
     {
+        $stylesheetFiles[] = "plugins/GroupPermissions/vue/src/node_modules/vue-multiselect/dist/vue-multiselect.css";
         $stylesheetFiles[] = "plugins/GroupPermissions/stylesheets/groupPermissions.less";
-        $stylesheetFiles[] = "plugins/GroupPermissions/stylesheets/choices.less";
     }
 
     public function getClientSideTranslationKeys(&$translations)
     {
         $translations[] = 'GroupPermissions_AddUserToGroup';
         $translations[] = 'GroupPermissions_AddUserToGroupButton';
+        $translations[] = 'GroupPermissions_ChangeAccessToAllSitesConfirm';
+        $translations[] = 'GroupPermissions_CreateNewGroup';
+        $translations[] = 'GroupPermissions_CreateNewGroupButton';
+        $translations[] = 'GroupPermissions_DeleteGroup';
+        $translations[] = 'GroupPermissions_DeleteGroupButton';
+        $translations[] = 'GroupPermissions_DeleteGroupConfirm';
+        $translations[] = 'GroupPermissions_DescriptionAccessTab';
+        $translations[] = 'GroupPermissions_DescriptionGroupsTab';
+        $translations[] = 'GroupPermissions_ExceptionGroupDoesExist';
+        $translations[] = 'GroupPermissions_ExceptionGroupDoesNotExist';
+        $translations[] = 'GroupPermissions_ExceptionUserAlreadyInGroup';
+        $translations[] = 'GroupPermissions_Group';
+        $translations[] = 'GroupPermissions_GroupPermissions';
+        $translations[] = 'GroupPermissions_ManageAccess';
+        $translations[] = 'GroupPermissions_ManageGroup';
         $translations[] = 'GroupPermissions_ManageGroupMembers';
+        $translations[] = 'GroupPermissions_ManageGroups';
+        $translations[] = 'GroupPermissions_MenuGroupPermissions';
         $translations[] = 'GroupPermissions_RemoveFromGroup';
         $translations[] = 'GroupPermissions_RemoveFromGroupConfirm';
+        $translations[] = 'GroupPermissions_RenameGroup';
+        $translations[] = 'GroupPermissions_RenameGroupButton';
+        $translations[] = 'GroupPermissions_RenameGroupConfirm';
         $translations[] = 'GroupPermissions_SelectNewUser';
+
+        $translations[] = 'UsersManager_ApplyToAllWebsites';
+        $translations[] = 'UsersManager_PrivNone';
+        $translations[] = 'UsersManager_PrivView';
+        $translations[] = 'UsersManager_PrivWrite';
+        $translations[] = 'UsersManager_PrivAdmin';
+
+        $translations[] = 'General_Username';
+        $translations[] = 'General_Yes';
+        $translations[] = 'General_No';
     }
 
     /**

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -6,6 +7,7 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\GroupPermissions;
 
 use Piwik\Plugins\GroupPermissions\Dao\Group;
@@ -22,7 +24,7 @@ class Model
 
         $permission = new GroupPermission();
         $permission->install();
-        
+
         $user = new GroupUser();
         $user->install();
     }
@@ -34,18 +36,18 @@ class Model
 
         $permission = new GroupPermission();
         $permission->uninstall();
-        
+
         $user = new GroupUser();
         $user->uninstall();
     }
-    
+
     // Group
     public function createGroup($name)
     {
         $group = new Group();
         return $group->createGroup($name);
     }
-    
+
     public function getAllGroups()
     {
         $group = new Group();
@@ -57,7 +59,7 @@ class Model
         $group = new Group();
         return $group->getGroupWithId($idGroup);
     }
-    
+
     public function getGroupWithName($name)
     {
         $group = new Group();
@@ -69,26 +71,26 @@ class Model
         $group = new Group();
         return $group->renameGroup($idGroup, $newName);
     }
-    
+
     public function deleteGroup($idGroup)
     {
         $group = new Group();
         return $group->deleteGroup($idGroup);
     }
-    
+
     // GroupUser
     public function addUserToGroup($idGroup, $login)
     {
         $user = new GroupUser();
         return $user->addUserToGroup($idGroup, $login);
     }
-    
+
     public function getMembersOfGroup($idGroup)
     {
         $user = new GroupUser();
         return $user->getMembersOfGroup($idGroup);
     }
-    
+
     public function isUserInGroup($login, $idGroup)
     {
         $user = new GroupUser();
@@ -100,7 +102,7 @@ class Model
         $user = new GroupUser();
         return $user->getGroupsOfUser($login);
     }
-    
+
     public function removeUserFromGroup($idGroup, $login)
     {
         $user = new GroupUser();
@@ -118,14 +120,14 @@ class Model
         $user = new GroupUser();
         return $user->removeUserFromAllGroups($login);
     }
-    
+
     // GroupPermission
     public function createPermission($idGroup, $idSite, $access)
     {
         $permission = new GroupPermission();
         return $permission->createPermission($idGroup, $idSite, $access);
     }
-    
+
     public function getPermissionsOfGroup($idGroup)
     {
         $permission = new GroupPermission();
@@ -137,7 +139,7 @@ class Model
         $permission = new GroupPermission();
         return $permission->getPermissionsOfSite($idSite);
     }
-    
+
     public function removePermission($idGroup, $idSite)
     {
         $permission = new GroupPermission();
@@ -155,7 +157,7 @@ class Model
         $permission = new GroupPermission();
         return $permission->removeAllPermissionsForSite($idSite);
     }
-    
+
     // MultiTable
     public function getPermissionsOfUser($login)
     {

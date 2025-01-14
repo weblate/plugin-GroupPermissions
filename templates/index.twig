@@ -15,7 +15,7 @@
             <a href="{{ linkTo({'show': 'groups'}) }}">{{ 'GroupPermissions_ManageGroups'|translate }}</a>
         </li>
     </ul>
-    
+
     {% if activeTab=='access' %}
         {% include '@GroupPermissions/_access.twig' %}
     {% elseif activeTab=='groups' %}
