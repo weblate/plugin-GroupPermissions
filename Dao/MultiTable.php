@@ -13,27 +13,16 @@ namespace Piwik\Plugins\GroupPermissions\Dao;
 use Piwik\Common;
 use Piwik\Db;
 
-class MultiTable
-{
+class MultiTable {
     /** @var string $tablePrefixedGroupPermission */
     private $tablePrefixedGroupPermission = '';
 
     /** @var string $tablePrefixedGroupUser */
     private $tablePrefixedGroupUser = '';
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->tablePrefixedGroupPermission = Common::prefixTable(GroupPermission::TABLE);
         $this->tablePrefixedGroupUser = Common::prefixTable(GroupUser::TABLE);
-    }
-
-    /**
-     * @return \Piwik\Tracker\Db|\Piwik\Db
-     */
-    private function getDb()
-    {
-        /** @phpstan-ignore return.type */
-        return Db::get();
     }
 
     /**
@@ -42,8 +31,7 @@ class MultiTable
      *   access: string
      * }>
      */
-    public function getPermissionsOfUser(string $login): array
-    {
+    public function getPermissionsOfUser(string $login): array {
         $tablePermission = $this->tablePrefixedGroupPermission;
         $tableUser = $this->tablePrefixedGroupUser;
         $sql = "SELECT ga.idsite, ga.access FROM $tablePermission as ga 
@@ -57,5 +45,13 @@ class MultiTable
         }
 
         return $permissions;
+    }
+
+    /**
+     * @return \Piwik\Tracker\Db|\Piwik\Db
+     */
+    private function getDb() {
+        /** @phpstan-ignore return.type */
+        return Db::get();
     }
 }

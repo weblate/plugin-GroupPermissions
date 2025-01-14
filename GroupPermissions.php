@@ -12,16 +12,13 @@ namespace Piwik\Plugins\GroupPermissions;
 
 use Piwik\Plugin;
 
-class GroupPermissions extends Plugin
-{
-    public function install(): void
-    {
+class GroupPermissions extends Plugin {
+    public function install(): void {
         $model = new Model();
         $model->install();
     }
 
-    public function uninstall(): void
-    {
+    public function uninstall(): void {
         $model = new Model();
         $model->uninstall();
     }
@@ -31,8 +28,7 @@ class GroupPermissions extends Plugin
      *
      * @return array<string, string>
      */
-    public function registerEvents(): array
-    {
+    public function registerEvents(): array {
         return [
             'AssetManager.getStylesheetFiles'        => 'getStylesheetFiles',
             'SitesManager.deleteSite.end'            => 'deleteSite',
@@ -48,17 +44,15 @@ class GroupPermissions extends Plugin
      *
      * @param array<string> $stylesheetFiles
      */
-    public function getStylesheetFiles(array &$stylesheetFiles): void
-    {
-        $stylesheetFiles[] = "plugins/GroupPermissions/stylesheets/vue-multiselect.css";
-        $stylesheetFiles[] = "plugins/GroupPermissions/stylesheets/groupPermissions.less";
+    public function getStylesheetFiles(array &$stylesheetFiles): void {
+        $stylesheetFiles[] = 'plugins/GroupPermissions/stylesheets/vue-multiselect.css';
+        $stylesheetFiles[] = 'plugins/GroupPermissions/stylesheets/groupPermissions.less';
     }
 
     /**
      * @param array<string> $translations
      */
-    public function getClientSideTranslationKeys(array &$translations): void
-    {
+    public function getClientSideTranslationKeys(array &$translations): void {
         $translations[] = 'GroupPermissions_AddUserToGroup';
         $translations[] = 'GroupPermissions_AddUserToGroupButton';
         $translations[] = 'GroupPermissions_ChangeAccessToAllSitesConfirm';
@@ -100,8 +94,7 @@ class GroupPermissions extends Plugin
     /**
      * Delete group preferences associated with a particular site
      */
-    public function deleteSite(int $idSite): void
-    {
+    public function deleteSite(int $idSite): void {
         $model = new Model();
         $model->removeAllPermissionsForSite($idSite);
     }
@@ -109,8 +102,7 @@ class GroupPermissions extends Plugin
     /**
      * Delete group preferences associated with a particular user
      */
-    public function deleteUser(string $login): void
-    {
+    public function deleteUser(string $login): void {
         $model = new Model();
         $model->removeUserFromAllGroups($login);
     }

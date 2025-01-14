@@ -20,8 +20,7 @@ use Piwik\Tracker\Cache;
 use Piwik\Plugins\UsersManager\API as UsersManagerAPI;
 use Piwik\Plugins\SitesManager\API as SitesManagerAPI;
 
-class API extends \Piwik\Plugin\API
-{
+class API extends \Piwik\Plugin\API {
     /**
      * @var Model $model
      */
@@ -37,8 +36,7 @@ class API extends \Piwik\Plugin\API
      */
     private static $instance = null;
 
-    public function __construct(Model $model)
-    {
+    public function __construct(Model $model) {
         $this->model = $model;
 
         $roleProvider = StaticContainer::get(RolesProvider::class);
@@ -51,8 +49,7 @@ class API extends \Piwik\Plugin\API
     /**
      * @return self
      */
-    public static function getInstance()
-    {
+    public static function getInstance() {
         try {
             $instance = StaticContainer::get('GroupPermissions_API');
             if (!($instance instanceof API)) {
@@ -79,8 +76,7 @@ class API extends \Piwik\Plugin\API
     /**
      * @return array<string, string>
      */
-    public function getGroupAccessFromSite(int $idSite): array
-    {
+    public function getGroupAccessFromSite(int $idSite): array {
         Piwik::checkUserHasAdminAccess($idSite);
 
         $groups = $this->model->getAllGroups();
@@ -91,7 +87,7 @@ class API extends \Piwik\Plugin\API
         foreach ($groups as $group) {
             $data[$group['idgroup']] = [
                 'name' => $group['name'],
-                'access' => 'noaccess'
+                'access' => 'noaccess',
             ];
         }
 
@@ -107,15 +103,13 @@ class API extends \Piwik\Plugin\API
         return $return;
     }
 
-
     /**
      * @return array<array{
      *   idGroup: int,
      *   name: string
      * }>
      */
-    public function getAllGroups(): array
-    {
+    public function getAllGroups(): array {
         $groups = $this->model->getAllGroups();
         if (!$groups) {
             return [];
@@ -125,7 +119,7 @@ class API extends \Piwik\Plugin\API
         foreach ($groups as $group) {
             $mappedGroups[] = [
                 'idGroup' => intval($group['idgroup']),
-                'name' => $group['name']
+                'name' => $group['name'],
             ];
         }
 
@@ -138,16 +132,15 @@ class API extends \Piwik\Plugin\API
      *   name: string
      * }
      */
-    public function getGroupWithId(int $idGroup): array
-    {
+    public function getGroupWithId(int $idGroup): array {
         $group = $this->model->getGroupWithId($idGroup);
         if (!$group) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $idGroup));
+            throw new Exception(Piwik::translate('GroupPermissions_ExceptionGroupDoesNotExist', $idGroup));
         }
 
         return [
             'idGroup' => intval($group['idgroup']),
-            'name' => $group['name']
+            'name' => $group['name'],
         ];
     }
 
@@ -156,30 +149,28 @@ class API extends \Piwik\Plugin\API
      *    login: string
      * }>
      */
-    public function getMembersOfGroup(int $idGroup): array
-    {
+    public function getMembersOfGroup(int $idGroup): array {
         Piwik::checkUserHasSuperUserAccess();
 
         return $this->model->getMembersOfGroup($idGroup);
     }
 
-    public function addUserToGroup(int $idGroup, string $login): void
-    {
+    public function addUserToGroup(int $idGroup, string $login): void {
         Piwik::checkUserHasSuperUserAccess();
 
         $group = $this->model->getGroupWithId($idGroup);
         if (empty($group['idgroup'])) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $idGroup));
+            throw new Exception(Piwik::translate('GroupPermissions_ExceptionGroupDoesNotExist', $idGroup));
         }
         $idGroup = $group['idgroup'];
 
         $usersManagerApi = UsersManagerAPI::getInstance();
         if (!$usersManagerApi->userExists($login)) {
-            throw new Exception(Piwik::translate("UsersManager_ExceptionUserDoesNotExist", $login));
+            throw new Exception(Piwik::translate('UsersManager_ExceptionUserDoesNotExist', $login));
         }
 
         if ($this->model->isUserInGroup($login, $idGroup)) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionUserAlreadyInGroup", $login));
+            throw new Exception(Piwik::translate('GroupPermissions_ExceptionUserAlreadyInGroup', $login));
         }
 
         $this->model->removeUserFromGroup($idGroup, $login);
@@ -187,33 +178,31 @@ class API extends \Piwik\Plugin\API
         $this->model->addUserToGroup($idGroup, $login);
     }
 
-    public function removeUserFromGroup(int $idGroup, string $login): void
-    {
+    public function removeUserFromGroup(int $idGroup, string $login): void {
         Piwik::checkUserHasSuperUserAccess();
 
         $group = $this->model->getGroupWithId($idGroup);
         if (empty($group['idgroup'])) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $idGroup));
+            throw new Exception(Piwik::translate('GroupPermissions_ExceptionGroupDoesNotExist', $idGroup));
         }
         $idGroup = $group['idgroup'];
 
         $usersManagerApi = UsersManagerAPI::getInstance();
         if (!$usersManagerApi->userExists($login)) {
-            throw new Exception(Piwik::translate("UsersManager_ExceptionUserDoesNotExist", $login));
+            throw new Exception(Piwik::translate('UsersManager_ExceptionUserDoesNotExist', $login));
         }
 
         $this->model->removeUserFromGroup($idGroup, $login);
     }
 
-    public function setGroupAccess(string $name, string $access, string $idSites): void
-    {
+    public function setGroupAccess(string $name, string $access, string $idSites): void {
         if ($access != 'noaccess') {
             $this->checkAccessType($access);
         }
 
         $group = $this->model->getGroupWithName($name);
         if (empty($group['idgroup'])) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $name));
+            throw new Exception(Piwik::translate('GroupPermissions_ExceptionGroupDoesNotExist', $name));
         }
         $idGroup = $group['idgroup'];
 
@@ -249,23 +238,13 @@ class API extends \Piwik\Plugin\API
         Cache::deleteTrackerCache();
     }
 
-    private function checkAccessType(string $access): void
-    {
-        $roles = $this->roleProvider->getAllRoleIds();
-
-        if (!in_array($access, $roles, true)) {
-            throw new Exception(Piwik::translate("UsersManager_ExceptionAccessValues", implode(", ", $roles), $access));
-        }
-    }
-
     /**
      * @return array{
      *   idGroup: int,
      *   name: string
      * }
      */
-    public function createGroup(string $groupName): array
-    {
+    public function createGroup(string $groupName): array {
         Piwik::checkUserHasSuperUserAccess();
 
         try {
@@ -275,27 +254,26 @@ class API extends \Piwik\Plugin\API
         }
 
         if ($existingGroup) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesExist", $groupName));
+            throw new Exception(Piwik::translate('GroupPermissions_ExceptionGroupDoesExist', $groupName));
         }
 
         $idGroup = $this->model->createGroup($groupName);
         if (!$idGroup) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $idGroup));
+            throw new Exception(Piwik::translate('GroupPermissions_ExceptionGroupDoesNotExist', $idGroup));
         }
 
         return [
             'idGroup' => $idGroup,
-            'name' => $groupName
+            'name' => $groupName,
         ];
     }
 
-    public function renameGroup(int $idGroup, string $newName): void
-    {
+    public function renameGroup(int $idGroup, string $newName): void {
         Piwik::checkUserHasSuperUserAccess();
 
         $group = $this->model->getGroupWithId($idGroup);
         if (empty($group['idgroup'])) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $idGroup));
+            throw new Exception(Piwik::translate('GroupPermissions_ExceptionGroupDoesNotExist', $idGroup));
         }
         $idGroup = $group['idgroup'];
 
@@ -306,19 +284,18 @@ class API extends \Piwik\Plugin\API
         }
 
         if ($existingGroup) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesExist", $newName));
+            throw new Exception(Piwik::translate('GroupPermissions_ExceptionGroupDoesExist', $newName));
         }
 
         $this->model->renameGroup($idGroup, $newName);
     }
 
-    public function deleteGroup(int $idGroup): void
-    {
+    public function deleteGroup(int $idGroup): void {
         Piwik::checkUserHasSuperUserAccess();
 
         $group = $this->model->getGroupWithId($idGroup);
         if (empty($group['idgroup'])) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $idGroup));
+            throw new Exception(Piwik::translate('GroupPermissions_ExceptionGroupDoesNotExist', $idGroup));
         }
         $idGroup = $group['idgroup'];
 
@@ -326,5 +303,13 @@ class API extends \Piwik\Plugin\API
         $this->model->removeAllUsersOfGroup($idGroup);
 
         $this->model->deleteGroup($idGroup);
+    }
+
+    private function checkAccessType(string $access): void {
+        $roles = $this->roleProvider->getAllRoleIds();
+
+        if (!in_array($access, $roles, true)) {
+            throw new Exception(Piwik::translate('UsersManager_ExceptionAccessValues', implode(', ', $roles), $access));
+        }
     }
 }

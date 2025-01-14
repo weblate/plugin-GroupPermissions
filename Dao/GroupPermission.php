@@ -14,43 +14,29 @@ use Piwik\Common;
 use Piwik\Db;
 use Piwik\DbHelper;
 
-class GroupPermission
-{
+class GroupPermission {
     public const TABLE = 'gpermissions_access';
 
     /** @var string $tablePrefixed */
     private $tablePrefixed = '';
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->tablePrefixed = Common::prefixTable(self::TABLE);
     }
 
-    /**
-     * @return \Piwik\Tracker\Db|\Piwik\Db
-     */
-    private function getDb()
-    {
-        /** @phpstan-ignore return.type */
-        return Db::get();
-    }
-
-    public function install(): void
-    {
-        DbHelper::createTable(self::TABLE, "
+    public function install(): void {
+        DbHelper::createTable(self::TABLE, '
                   `idgroup` int(10) UNSIGNED NOT NULL,
                   `idsite` int(10) UNSIGNED NOT NULL,
                   `access` VARCHAR(100) NOT NULL,
-                  PRIMARY KEY(`idgroup`, `idsite`)");
+                  PRIMARY KEY(`idgroup`, `idsite`)');
     }
 
-    public function uninstall(): void
-    {
+    public function uninstall(): void {
         Db::query(sprintf('DROP TABLE IF EXISTS `%s`', $this->tablePrefixed));
     }
 
-    public function createPermission(int $idGroup, int $idSite, string $access): void
-    {
+    public function createPermission(int $idGroup, int $idSite, string $access): void {
         $db = $this->getDb();
 
         $query = 'INSERT INTO ' . $this->tablePrefixed
@@ -61,7 +47,7 @@ class GroupPermission
             $idGroup,
             $idSite,
             $access,
-            $access
+            $access,
         ]);
     }
 
@@ -71,8 +57,7 @@ class GroupPermission
      *  access: string
      * }>
      */
-    public function getPermissionsOfGroup(int $idGroup): array
-    {
+    public function getPermissionsOfGroup(int $idGroup): array {
         $idGroup = intval($idGroup);
         $table = $this->tablePrefixed;
 
@@ -90,8 +75,7 @@ class GroupPermission
      *   access: string
      * }>
      */
-    public function getPermissionsOfSite(int $idSite): array
-    {
+    public function getPermissionsOfSite(int $idSite): array {
         $idSite = intval($idSite);
         $table = $this->tablePrefixed;
 
@@ -103,27 +87,32 @@ class GroupPermission
         return $permissions;
     }
 
-    public function removePermission(int $idGroup, int $idSite): void
-    {
+    public function removePermission(int $idGroup, int $idSite): void {
         $table = $this->tablePrefixed;
         $query = "DELETE FROM $table WHERE idgroup = ? AND idSite = ?";
         $bind = [intval($idGroup), intval($idSite)];
         $this->getDb()->query($query, $bind);
     }
 
-    public function removeAllPermissionsOfGroup(int $idGroup): void
-    {
+    public function removeAllPermissionsOfGroup(int $idGroup): void {
         $table = $this->tablePrefixed;
         $query = "DELETE FROM $table WHERE idgroup = ?";
         $bind = [intval($idGroup)];
         $this->getDb()->query($query, $bind);
     }
 
-    public function removeAllPermissionsForSite(int $idSite): void
-    {
+    public function removeAllPermissionsForSite(int $idSite): void {
         $table = $this->tablePrefixed;
         $query = "DELETE FROM $table WHERE idSite = ?";
         $bind = [intval($idSite)];
         $this->getDb()->query($query, $bind);
+    }
+
+    /**
+     * @return \Piwik\Tracker\Db|\Piwik\Db
+     */
+    private function getDb() {
+        /** @phpstan-ignore return.type */
+        return Db::get();
     }
 }

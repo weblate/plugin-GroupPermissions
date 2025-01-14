@@ -12,8 +12,7 @@ namespace Piwik\Plugins\GroupPermissions;
 
 use Piwik\Db;
 
-class Access extends \Piwik\Access
-{
+class Access extends \Piwik\Access {
     /**
      * @param string $login
      *
@@ -22,9 +21,8 @@ class Access extends \Piwik\Access
      *   access: string
      * }>
      */
-    public function getRawSitesWithSomeViewAccess($login)
-    {
-        $sql = self::getSqlAccessSite("access, t2.idsite");
+    public function getRawSitesWithSomeViewAccess($login) {
+        $sql = self::getSqlAccessSite('access, t2.idsite');
         $userRights = Db::fetchAll($sql, [$login]);
 
         $model = new Model();
@@ -43,6 +41,7 @@ class Access extends \Piwik\Access
 
             if (!isset($rights[$userRight['idsite']])) {
                 $rights[$userRight['idsite']] = $userRight['access'];
+
                 continue;
             }
 
@@ -53,6 +52,7 @@ class Access extends \Piwik\Access
 
             if (!isset($rights[$groupRight['idsite']])) {
                 $rights[$groupRight['idsite']] = $groupRight['access'];
+
                 continue;
             }
 
@@ -63,15 +63,14 @@ class Access extends \Piwik\Access
         foreach ($rights as $idsite => $access) {
             $sites[] = [
                 'idsite' => $idsite,
-                'access' => $access
+                'access' => $access,
             ];
         }
 
         return $sites;
     }
 
-    public function getHigherPermission(string $permission1, string $permission2): string
-    {
+    public function getHigherPermission(string $permission1, string $permission2): string {
         if ($permission1 === 'admin' || $permission2 === 'admin') {
             return 'admin';
         } elseif ($permission1 === 'write' || $permission2 === 'write') {

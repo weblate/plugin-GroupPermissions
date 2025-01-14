@@ -16,47 +16,33 @@ use Piwik\DbHelper;
 use Piwik\Piwik;
 use Exception;
 
-class Group
-{
+class Group {
     public const TABLE = 'gpermissions_group';
 
     /** @var string $tablePrefixed */
     private $tablePrefixed = '';
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->tablePrefixed = Common::prefixTable(self::TABLE);
     }
 
-    /**
-     * @return \Piwik\Tracker\Db|\Piwik\Db
-     */
-    private function getDb()
-    {
-        /** @phpstan-ignore return.type */
-        return Db::get();
-    }
-
-    public function install(): void
-    {
+    public function install(): void {
         DbHelper::createTable(self::TABLE, "
                   `idgroup` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
                   `name` VARCHAR(64) NOT NULL DEFAULT '',
                   PRIMARY KEY(`idgroup`)");
     }
 
-    public function uninstall(): void
-    {
+    public function uninstall(): void {
         Db::query(sprintf('DROP TABLE IF EXISTS `%s`', $this->tablePrefixed));
     }
 
-    public function createGroup(string $name): int
-    {
+    public function createGroup(string $name): int {
         $db = $this->getDb();
 
         /** @phpstan-ignore method.notFound */
         $db->insert($this->tablePrefixed, [
-            'name' => $name
+            'name' => $name,
         ]);
 
         /** @phpstan-ignore method.notFound */
@@ -69,8 +55,7 @@ class Group
      *   name: string
      * }>
      */
-    public function getAllGroups(): array
-    {
+    public function getAllGroups(): array {
         $table = $this->tablePrefixed;
 
         $groups = $this->getDb()->fetchAll("SELECT * FROM $table");
@@ -87,14 +72,13 @@ class Group
      *   name: string
      * }
      */
-    public function getGroupWithId(int $idGroup): array
-    {
+    public function getGroupWithId(int $idGroup): array {
         $idGroup = intval($idGroup);
         $table = $this->tablePrefixed;
 
         $group = $this->getDb()->fetchRow("SELECT * FROM $table WHERE idgroup = ?", [$idGroup]);
         if (!$group) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $idGroup));
+            throw new Exception(Piwik::translate('GroupPermissions_ExceptionGroupDoesNotExist', $idGroup));
         }
 
         return $group;
@@ -106,35 +90,40 @@ class Group
      *   name: string
      * }
      */
-    public function getGroupWithName(string $name): array
-    {
+    public function getGroupWithName(string $name): array {
         $table = $this->tablePrefixed;
 
         $group = $this->getDb()->fetchRow("SELECT * FROM $table WHERE name = ?", [$name]);
         if (!$group) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $name));
+            throw new Exception(Piwik::translate('GroupPermissions_ExceptionGroupDoesNotExist', $name));
         }
 
         return $group;
     }
 
-    public function renameGroup(int $idGroup, string $newName): void
-    {
+    public function renameGroup(int $idGroup, string $newName): void {
         $idGroup = intval($idGroup);
 
         $db = $this->getDb();
 
         /** @phpstan-ignore method.notFound */
         $db->update($this->tablePrefixed, [
-            'name' => $newName
+            'name' => $newName,
         ], "idgroup = $idGroup");
     }
 
-    public function deleteGroup(int $idGroup): void
-    {
+    public function deleteGroup(int $idGroup): void {
         $table = $this->tablePrefixed;
         $query = "DELETE FROM $table WHERE idgroup = ?";
         $bind = [intval($idGroup)];
         $this->getDb()->query($query, $bind);
+    }
+
+    /**
+     * @return \Piwik\Tracker\Db|\Piwik\Db
+     */
+    private function getDb() {
+        /** @phpstan-ignore return.type */
+        return Db::get();
     }
 }

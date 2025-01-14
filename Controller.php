@@ -15,18 +15,15 @@ use Piwik\Piwik;
 use Piwik\Plugin\ControllerAdmin;
 use Piwik\View;
 
-class Controller extends ControllerAdmin
-{
-    public function __construct()
-    {
+class Controller extends ControllerAdmin {
+    public function __construct() {
         parent::__construct();
     }
 
     /**
      * The "Manage Users and Permissions" Admin UI screen
      */
-    public function index(): string
-    {
+    public function index(): string {
         Piwik::checkUserIsNotAnonymous();
         Piwik::checkUserHasSomeAdminAccess();
 

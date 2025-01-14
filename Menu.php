@@ -13,10 +13,8 @@ namespace Piwik\Plugins\GroupPermissions;
 use Piwik\Menu\MenuAdmin;
 use Piwik\Piwik;
 
-class Menu extends \Piwik\Plugin\Menu
-{
-    public function configureAdminMenu(MenuAdmin $menu): void
-    {
+class Menu extends \Piwik\Plugin\Menu {
+    public function configureAdminMenu(MenuAdmin $menu): void {
         if (Piwik::isUserHasSomeAdminAccess()) {
             $menu->addSystemItem('GroupPermissions_MenuGroupPermissions', $this->urlForAction('index'), $order = 17);
         }

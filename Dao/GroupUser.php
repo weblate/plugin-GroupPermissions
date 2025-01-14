@@ -14,48 +14,34 @@ use Piwik\Common;
 use Piwik\Db;
 use Piwik\DbHelper;
 
-class GroupUser
-{
+class GroupUser {
     public const TABLE = 'gpermissions_user';
 
     /** @var string $tablePrefixed */
     private $tablePrefixed = '';
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->tablePrefixed = Common::prefixTable(self::TABLE);
     }
 
-    /**
-     * @return \Piwik\Tracker\Db|\Piwik\Db
-     */
-    private function getDb()
-    {
-        /** @phpstan-ignore return.type */
-        return Db::get();
-    }
-
-    public function install(): void
-    {
-        DbHelper::createTable(self::TABLE, "
+    public function install(): void {
+        DbHelper::createTable(self::TABLE, '
                   `idgroup` int(10) UNSIGNED NOT NULL,
                   `login` VARCHAR(100) NOT NULL,
-                  PRIMARY KEY(`idgroup`, `login`)");
+                  PRIMARY KEY(`idgroup`, `login`)');
     }
 
-    public function uninstall(): void
-    {
+    public function uninstall(): void {
         Db::query(sprintf('DROP TABLE IF EXISTS `%s`', $this->tablePrefixed));
     }
 
-    public function addUserToGroup(int $idGroup, string $login): void
-    {
+    public function addUserToGroup(int $idGroup, string $login): void {
         $db = $this->getDb();
 
         /** @phpstan-ignore method.notFound */
         $db->insert($this->tablePrefixed, [
             'idgroup' => $idGroup,
-            'login' => $login
+            'login' => $login,
         ]);
     }
 
@@ -64,8 +50,7 @@ class GroupUser
      *    login: string
      * }>
      */
-    public function getMembersOfGroup(int $idGroup): array
-    {
+    public function getMembersOfGroup(int $idGroup): array {
         $idGroup = intval($idGroup);
         $table = $this->tablePrefixed;
 
@@ -77,10 +62,10 @@ class GroupUser
         return $members;
     }
 
-    public function isUserInGroup(string $login, int $idGroup): bool
-    {
+    public function isUserInGroup(string $login, int $idGroup): bool {
         $idGroup = intval($idGroup);
         $table = $this->tablePrefixed;
+
         return (bool) $this->getDb()->fetchAll("SELECT login FROM $table WHERE login = ? AND idgroup = ?", [$login, $idGroup]);
     }
 
@@ -89,8 +74,7 @@ class GroupUser
      *    idgroup: int
      * }>
      */
-    public function getGroupsOfUser(string $login): array
-    {
+    public function getGroupsOfUser(string $login): array {
         $table = $this->tablePrefixed;
 
         $groups = $this->getDb()->fetchAll("SELECT idgroup FROM $table WHERE login = ?", [$login]);
@@ -101,27 +85,32 @@ class GroupUser
         return $groups;
     }
 
-    public function removeUserFromGroup(int $idGroup, string $login): void
-    {
+    public function removeUserFromGroup(int $idGroup, string $login): void {
         $table = $this->tablePrefixed;
         $query = "DELETE FROM $table WHERE idgroup = ? AND login = ?";
         $bind = [intval($idGroup), $login];
         $this->getDb()->query($query, $bind);
     }
 
-    public function removeAllUsersOfGroup(int $idGroup): void
-    {
+    public function removeAllUsersOfGroup(int $idGroup): void {
         $table = $this->tablePrefixed;
         $query = "DELETE FROM $table WHERE idgroup = ?";
         $bind = [intval($idGroup)];
         $this->getDb()->query($query, $bind);
     }
 
-    public function removeUserFromAllGroups(string $login): void
-    {
+    public function removeUserFromAllGroups(string $login): void {
         $table = $this->tablePrefixed;
         $query = "DELETE FROM $table WHERE login = ?";
         $bind = [$login];
         $this->getDb()->query($query, $bind);
+    }
+
+    /**
+     * @return \Piwik\Tracker\Db|\Piwik\Db
+     */
+    private function getDb() {
+        /** @phpstan-ignore return.type */
+        return Db::get();
     }
 }
