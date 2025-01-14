@@ -83,7 +83,7 @@ import {
   Matomo,
   translate,
 } from 'CoreHome';
-import Multiselect from '../node_modules/vue-multiselect';
+import Multiselect from 'vue-multiselect';
 import { Group } from './TabManageGroups.vue';
 
 export default defineComponent({

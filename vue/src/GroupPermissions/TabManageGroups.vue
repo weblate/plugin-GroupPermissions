@@ -39,7 +39,7 @@ import {
   AjaxHelper,
   MatomoUrl,
 } from 'CoreHome';
-import Multiselect from '../node_modules/vue-multiselect';
+import Multiselect from 'vue-multiselect';
 import CreateGroup from './CreateGroup.vue';
 import ManageGroup from './ManageGroup.vue';
 

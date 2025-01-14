@@ -63,6 +63,7 @@ import {
   ActivityIndicator,
   AjaxHelper,
   Matomo,
+  MatomoUrl,
   translate,
 } from 'CoreHome';
 import ManageGroupMembers from './ManageGroupMembers.vue';
@@ -90,9 +91,16 @@ export default defineComponent({
   },
   emits: ['group-renamed', 'group-deleted'],
   mounted() {
-    this.newGroupName = this.group.name;
+    this.onGroupUpdated();
   },
   methods: {
+    onGroupUpdated() {
+      this.newGroupName = this.group.name;
+      MatomoUrl.updateHash({
+        ...MatomoUrl.hashParsed.value,
+        idGroup: this.group.idGroup,
+      });
+    },
     confirmRenameGroup() {
       this.confirmRenameGroupText = translate('GroupPermissions_RenameGroupConfirm', this.group.name, this.newGroupName);
       Matomo.helper.modalConfirm('#confirmRenameGroup', {
@@ -113,7 +121,10 @@ export default defineComponent({
       {
         errorElement: '#ajaxErrorRenameGroup',
       }).then(() => {
-        this.$emit('group-renamed', this.group);
+        this.$emit('group-renamed', {
+          idGroup: this.group.idGroup,
+          name: this.newGroupName,
+        });
       }).finally(() => {
         this.isRenaming = false;
       });
@@ -145,7 +156,7 @@ export default defineComponent({
   },
   watch: {
     group() {
-      this.newGroupName = this.group.name;
+      this.onGroupUpdated();
     },
   },
 });

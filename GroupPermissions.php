@@ -14,13 +14,13 @@ use Piwik\Plugin;
 
 class GroupPermissions extends Plugin
 {
-    public function install()
+    public function install(): void
     {
         $model = new Model();
         $model->install();
     }
 
-    public function uninstall()
+    public function uninstall(): void
     {
         $model = new Model();
         $model->uninstall();
@@ -28,8 +28,10 @@ class GroupPermissions extends Plugin
 
     /**
      * @see Piwik\Plugin::registerEvents
+     *
+     * @return array<string, string>
      */
-    public function registerEvents()
+    public function registerEvents(): array
     {
         return [
             'AssetManager.getStylesheetFiles'        => 'getStylesheetFiles',
@@ -43,14 +45,19 @@ class GroupPermissions extends Plugin
      * Return list of plug-in specific Stylesheet files to be imported by the asset manager
      *
      * @see Piwik\AssetManager
+     *
+     * @param array<string> $stylesheetFiles
      */
-    public function getStylesheetFiles(&$stylesheetFiles)
+    public function getStylesheetFiles(array &$stylesheetFiles): void
     {
-        $stylesheetFiles[] = "plugins/GroupPermissions/vue/src/node_modules/vue-multiselect/dist/vue-multiselect.css";
+        $stylesheetFiles[] = "plugins/GroupPermissions/stylesheets/vue-multiselect.css";
         $stylesheetFiles[] = "plugins/GroupPermissions/stylesheets/groupPermissions.less";
     }
 
-    public function getClientSideTranslationKeys(&$translations)
+    /**
+     * @param array<string> $translations
+     */
+    public function getClientSideTranslationKeys(array &$translations): void
     {
         $translations[] = 'GroupPermissions_AddUserToGroup';
         $translations[] = 'GroupPermissions_AddUserToGroupButton';
@@ -93,7 +100,7 @@ class GroupPermissions extends Plugin
     /**
      * Delete group preferences associated with a particular site
      */
-    public function deleteSite($idSite)
+    public function deleteSite(int $idSite): void
     {
         $model = new Model();
         $model->removeAllPermissionsForSite($idSite);
@@ -102,7 +109,7 @@ class GroupPermissions extends Plugin
     /**
      * Delete group preferences associated with a particular user
      */
-    public function deleteUser($login)
+    public function deleteUser(string $login): void
     {
         $model = new Model();
         $model->removeUserFromAllGroups($login);

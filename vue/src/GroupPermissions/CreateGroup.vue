@@ -59,10 +59,7 @@ export default defineComponent({
       {
         errorElement: '#ajaxErrorCreateGroup',
       }).then((response) => {
-        this.$emit('group-created', {
-          idGroup: response,
-          name: groupName,
-        });
+        this.$emit('group-created', response);
       }).finally(() => {
         this.isCreatingGroup = false;
       });
