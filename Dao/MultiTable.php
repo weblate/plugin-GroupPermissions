@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -6,6 +7,7 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\GroupPermissions\Dao;
 
 use Piwik\Common;
@@ -13,7 +15,10 @@ use Piwik\Db;
 
 class MultiTable
 {
+    /** @var string $tablePrefixedGroupPermission */
     private $tablePrefixedGroupPermission = '';
+
+    /** @var string $tablePrefixedGroupUser */
     private $tablePrefixedGroupUser = '';
 
     public function __construct()
@@ -22,12 +27,22 @@ class MultiTable
         $this->tablePrefixedGroupUser = Common::prefixTable(GroupUser::TABLE);
     }
 
+    /**
+     * @return \Piwik\Tracker\Db|\Piwik\Db
+     */
     private function getDb()
     {
+        /** @phpstan-ignore return.type */
         return Db::get();
     }
 
-    public function getPermissionsOfUser($login)
+    /**
+     * @return array<array{
+     *   idsite: int,
+     *   access: string
+     * }>
+     */
+    public function getPermissionsOfUser(string $login): array
     {
         $tablePermission = $this->tablePrefixedGroupPermission;
         $tableUser = $this->tablePrefixedGroupUser;
@@ -35,7 +50,12 @@ class MultiTable
                 INNER JOIN $tableUser AS gu 
                 ON ga.idgroup = gu.idgroup 
                 WHERE gu.login = ?";
-        
-        return $this->getDb()->fetchAll($sql, array($login));
-    }    
+
+        $permissions = $this->getDb()->fetchAll($sql, [$login]);
+        if (!$permissions) {
+            return [];
+        }
+
+        return $permissions;
+    }
 }

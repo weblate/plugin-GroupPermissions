@@ -23,23 +23,34 @@ use Piwik\Plugins\SitesManager\API as SitesManagerAPI;
 class API extends \Piwik\Plugin\API
 {
     /**
-     * @var Model
+     * @var Model $model
      */
     private $model;
 
     /**
-     * @var Access\RolesProvider
+     * @var Access\RolesProvider $roleProvider
      */
     private $roleProvider;
 
+    /**
+     * @var ?self $instance
+     */
     private static $instance = null;
 
     public function __construct(Model $model)
     {
         $this->model = $model;
-        $this->roleProvider = StaticContainer::get(RolesProvider::class);
+
+        $roleProvider = StaticContainer::get(RolesProvider::class);
+        if (!($roleProvider instanceof RolesProvider)) {
+            throw new Exception('RolesProvider must inherit Access\RolesProvider');
+        }
+        $this->roleProvider = $roleProvider;
     }
 
+    /**
+     * @return self
+     */
     public static function getInstance()
     {
         try {
@@ -49,15 +60,26 @@ class API extends \Piwik\Plugin\API
                 throw new Exception('GroupPermissions_API must inherit API');
             }
             self::$instance = $instance;
+
         } catch (Exception $e) {
-            self::$instance = StaticContainer::get('Piwik\Plugins\GroupPermissions\API');
+            $instance = StaticContainer::get('Piwik\Plugins\GroupPermissions\API');
+            if (!($instance instanceof API)) {
+                // Exception is caught below and corrected
+                throw new Exception('GroupPermissions_API must inherit API');
+            }
+
+            self::$instance = $instance;
+
             StaticContainer::getContainer()->set('GroupPermissions_API', self::$instance);
         }
 
         return self::$instance;
     }
 
-    public function getGroupAccessFromSite($idSite)
+    /**
+     * @return array<string, string>
+     */
+    public function getGroupAccessFromSite(int $idSite): array
     {
         Piwik::checkUserHasAdminAccess($idSite);
 
@@ -86,7 +108,13 @@ class API extends \Piwik\Plugin\API
     }
 
 
-    public function getAllGroups()
+    /**
+     * @return array<array{
+     *   idGroup: int,
+     *   name: string
+     * }>
+     */
+    public function getAllGroups(): array
     {
         $groups = $this->model->getAllGroups();
         if (!$groups) {
@@ -104,11 +132,17 @@ class API extends \Piwik\Plugin\API
         return $mappedGroups;
     }
 
-    public function getGroupWithId($idGroup)
+    /**
+     * @return array{
+     *   idGroup: int,
+     *   name: string
+     * }
+     */
+    public function getGroupWithId(int $idGroup): array
     {
         $group = $this->model->getGroupWithId($idGroup);
         if (!$group) {
-            return null;
+            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $idGroup));
         }
 
         return [
@@ -117,14 +151,19 @@ class API extends \Piwik\Plugin\API
         ];
     }
 
-    public function getMembersOfGroup($idGroup)
+    /**
+     * @return array<array{
+     *    login: string
+     * }>
+     */
+    public function getMembersOfGroup(int $idGroup): array
     {
         Piwik::checkUserHasSuperUserAccess();
 
         return $this->model->getMembersOfGroup($idGroup);
     }
 
-    public function addUserToGroup($idGroup, $login)
+    public function addUserToGroup(int $idGroup, string $login): void
     {
         Piwik::checkUserHasSuperUserAccess();
 
@@ -145,10 +184,10 @@ class API extends \Piwik\Plugin\API
 
         $this->model->removeUserFromGroup($idGroup, $login);
 
-        return $this->model->addUserToGroup($idGroup, $login);
+        $this->model->addUserToGroup($idGroup, $login);
     }
 
-    public function removeUserFromGroup($idGroup, $login)
+    public function removeUserFromGroup(int $idGroup, string $login): void
     {
         Piwik::checkUserHasSuperUserAccess();
 
@@ -163,20 +202,20 @@ class API extends \Piwik\Plugin\API
             throw new Exception(Piwik::translate("UsersManager_ExceptionUserDoesNotExist", $login));
         }
 
-        return $this->model->removeUserFromGroup($idGroup, $login);
+        $this->model->removeUserFromGroup($idGroup, $login);
     }
 
-    public function setGroupAccess($name, $access, $idSites)
+    public function setGroupAccess(string $name, string $access, string $idSites): void
     {
         if ($access != 'noaccess') {
             $this->checkAccessType($access);
         }
 
-        $idGroup = $this->model->getGroupWithName($name);
-        if (empty($idGroup['idgroup'])) {
+        $group = $this->model->getGroupWithName($name);
+        if (empty($group['idgroup'])) {
             throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $name));
         }
-        $idGroup = $idGroup['idgroup'];
+        $idGroup = $group['idgroup'];
 
         // in case idSites is all we grant access to all the websites on which the current connected user has an 'admin' access
         if ($idSites === 'all') {
@@ -210,7 +249,7 @@ class API extends \Piwik\Plugin\API
         Cache::deleteTrackerCache();
     }
 
-    private function checkAccessType($access)
+    private function checkAccessType(string $access): void
     {
         $roles = $this->roleProvider->getAllRoleIds();
 
@@ -219,18 +258,29 @@ class API extends \Piwik\Plugin\API
         }
     }
 
-    public function createGroup($groupName)
+    /**
+     * @return array{
+     *   idGroup: int,
+     *   name: string
+     * }
+     */
+    public function createGroup(string $groupName): array
     {
         Piwik::checkUserHasSuperUserAccess();
 
-        $idGroup = $this->model->getGroupWithName($groupName);
-        if (!empty($idGroup['idgroup'])) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesExist", $idGroup));
+        try {
+            $existingGroup = $this->model->getGroupWithName($groupName);
+        } catch (Exception $e) {
+            $existingGroup = null;
+        }
+
+        if ($existingGroup) {
+            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesExist", $groupName));
         }
 
         $idGroup = $this->model->createGroup($groupName);
         if (!$idGroup) {
-            return null;
+            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $idGroup));
         }
 
         return [
@@ -239,36 +289,42 @@ class API extends \Piwik\Plugin\API
         ];
     }
 
-    public function renameGroup($idGroup, $newName)
+    public function renameGroup(int $idGroup, string $newName): void
     {
         Piwik::checkUserHasSuperUserAccess();
 
-        $idGroup = $this->model->getGroupWithId($idGroup);
-        if (empty($idGroup['idgroup'])) {
+        $group = $this->model->getGroupWithId($idGroup);
+        if (empty($group['idgroup'])) {
             throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $idGroup));
         }
-        $idGroup = $idGroup['idgroup'];
+        $idGroup = $group['idgroup'];
 
-        if ($this->model->getGroupWithName($newName)) {
-            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesExist", $idGroup));
+        try {
+            $existingGroup = $this->model->getGroupWithName($newName);
+        } catch (Exception $e) {
+            $existingGroup = null;
         }
 
-        return $this->model->renameGroup($idGroup, $newName);
+        if ($existingGroup) {
+            throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesExist", $newName));
+        }
+
+        $this->model->renameGroup($idGroup, $newName);
     }
 
-    public function deleteGroup($idGroup)
+    public function deleteGroup(int $idGroup): void
     {
         Piwik::checkUserHasSuperUserAccess();
 
-        $idGroup = $this->model->getGroupWithId($idGroup);
-        if (empty($idGroup['idgroup'])) {
+        $group = $this->model->getGroupWithId($idGroup);
+        if (empty($group['idgroup'])) {
             throw new Exception(Piwik::translate("GroupPermissions_ExceptionGroupDoesNotExist", $idGroup));
         }
-        $idGroup = $idGroup['idgroup'];
+        $idGroup = $group['idgroup'];
 
         $this->model->removeAllPermissionsOfGroup($idGroup);
         $this->model->removeAllUsersOfGroup($idGroup);
 
-        return $this->model->deleteGroup($idGroup);
+        $this->model->deleteGroup($idGroup);
     }
 }

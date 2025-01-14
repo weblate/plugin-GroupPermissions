@@ -25,15 +25,17 @@ class Controller extends ControllerAdmin
     /**
      * The "Manage Users and Permissions" Admin UI screen
      */
-    public function index()
+    public function index(): string
     {
         Piwik::checkUserIsNotAnonymous();
         Piwik::checkUserHasSomeAdminAccess();
 
         $view = new View('@GroupPermissions/index');
 
+        /** @phpstan-ignore property.notFound  */
         $view->activeTab = Common::getRequestVar('show', 'access');
-        $validTabs = array('access', 'groups');
+
+        $validTabs = ['access', 'groups'];
         if (!in_array($view->activeTab, $validTabs)) {
             $view->activeTab = 'access';
         }

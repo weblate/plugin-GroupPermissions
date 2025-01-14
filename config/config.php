@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -7,7 +8,6 @@
  *
  */
 
-return array(
+return [
     'Piwik\Access' => DI\get('Piwik\Plugins\GroupPermissions\Access'),
-);
-
+];

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -6,6 +7,7 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\GroupPermissions\Dao;
 
 use Piwik\Common;
@@ -14,7 +16,9 @@ use Piwik\DbHelper;
 
 class GroupUser
 {
-    const TABLE = 'gpermissions_user';
+    public const TABLE = 'gpermissions_user';
+
+    /** @var string $tablePrefixed */
     private $tablePrefixed = '';
 
     public function __construct()
@@ -22,12 +26,16 @@ class GroupUser
         $this->tablePrefixed = Common::prefixTable(self::TABLE);
     }
 
+    /**
+     * @return \Piwik\Tracker\Db|\Piwik\Db
+     */
     private function getDb()
     {
+        /** @phpstan-ignore return.type */
         return Db::get();
     }
-    
-    public function install()
+
+    public function install(): void
     {
         DbHelper::createTable(self::TABLE, "
                   `idgroup` int(10) UNSIGNED NOT NULL,
@@ -35,61 +43,85 @@ class GroupUser
                   PRIMARY KEY(`idgroup`, `login`)");
     }
 
-    public function uninstall()
+    public function uninstall(): void
     {
         Db::query(sprintf('DROP TABLE IF EXISTS `%s`', $this->tablePrefixed));
     }
 
-    public function addUserToGroup($idGroup, $login)
+    public function addUserToGroup(int $idGroup, string $login): void
     {
         $db = $this->getDb();
-        $db->insert($this->tablePrefixed, array(
+
+        /** @phpstan-ignore method.notFound */
+        $db->insert($this->tablePrefixed, [
             'idgroup' => $idGroup,
             'login' => $login
-        ));
+        ]);
     }
-    
-    public function getMembersOfGroup($idGroup)
+
+    /**
+     * @return array<array{
+     *    login: string
+     * }>
+     */
+    public function getMembersOfGroup(int $idGroup): array
     {
         $idGroup = intval($idGroup);
         $table = $this->tablePrefixed;
-        return $this->getDb()->fetchAll("SELECT login FROM $table WHERE idgroup = ?", array($idGroup));
+
+        $members = $this->getDb()->fetchAll("SELECT login FROM $table WHERE idgroup = ?", [$idGroup]);
+        if (!$members) {
+            return [];
+        }
+
+        return $members;
     }
 
-    public function isUserInGroup($login, $idGroup)
+    public function isUserInGroup(string $login, int $idGroup): bool
     {
         $idGroup = intval($idGroup);
         $table = $this->tablePrefixed;
-        return $this->getDb()->fetchAll("SELECT login FROM $table WHERE login = ? AND idgroup = ?", array($login, $idGroup));
+        return (bool) $this->getDb()->fetchAll("SELECT login FROM $table WHERE login = ? AND idgroup = ?", [$login, $idGroup]);
     }
 
-    public function getGroupsOfUser($login)
+    /**
+     * @return array<array{
+     *    idgroup: int
+     * }>
+     */
+    public function getGroupsOfUser(string $login): array
     {
         $table = $this->tablePrefixed;
-        return $this->getDb()->fetchAll("SELECT idgroup FROM $table WHERE login = ?", array($login));
+
+        $groups = $this->getDb()->fetchAll("SELECT idgroup FROM $table WHERE login = ?", [$login]);
+        if (!$groups) {
+            return [];
+        }
+
+        return $groups;
     }
-    
-    public function removeUserFromGroup($idGroup, $login)
+
+    public function removeUserFromGroup(int $idGroup, string $login): void
     {
         $table = $this->tablePrefixed;
         $query = "DELETE FROM $table WHERE idgroup = ? AND login = ?";
-        $bind = array(intval($idGroup), $login);
+        $bind = [intval($idGroup), $login];
         $this->getDb()->query($query, $bind);
     }
 
-    public function removeAllUsersOfGroup($idGroup)
+    public function removeAllUsersOfGroup(int $idGroup): void
     {
         $table = $this->tablePrefixed;
         $query = "DELETE FROM $table WHERE idgroup = ?";
-        $bind = array(intval($idGroup));
+        $bind = [intval($idGroup)];
         $this->getDb()->query($query, $bind);
     }
 
-    public function removeUserFromAllGroups($login)
+    public function removeUserFromAllGroups(string $login): void
     {
         $table = $this->tablePrefixed;
         $query = "DELETE FROM $table WHERE login = ?";
-        $bind = array($login);
+        $bind = [$login];
         $this->getDb()->query($query, $bind);
     }
 }
