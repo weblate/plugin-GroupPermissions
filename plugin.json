@@ -18,6 +18,10 @@
         "permission",
         "group"
     ],
+    "support": {
+        "issues": "https:\/\/github.com\/MichaelRoosz\/plugin-GroupPermissions\/issues",
+        "source": "https:\/\/github.com\/MichaelRoosz\/plugin-GroupPermissions"
+    },
     "donate": {
         "paypal": "michael.roosz@web.de"
     }
